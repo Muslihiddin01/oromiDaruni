@@ -1,11 +1,146 @@
-import React from "react";
+import React, { useState } from "react";
+import { Button, Checkbox, Input, Modal } from "antd";
+import { useDispatch, useSelector } from "react-redux";
+import { addNewUser, deleteUser, editUser, changeStatus } from "./todolist";
+
 const h2 = "md:text-4xl text-2xl font-bold mb-5";
 const h3 = "text-lg font-bold mt-3";
 const main = "flex flex-col gap-3 my-10";
 const gray = "text-[#707070]";
 const Politika = () => {
+  let data = useSelector((store) => store.todolist.data);
+  let dispatch = useDispatch();
+
+  // add
+  const [isModalOpenAdd, setIsModalOpenAdd] = useState(false);
+
+  const handleCancelAdd = () => {
+    setIsModalOpenAdd(false);
+  };
+
+  let [inpAddImg, setInpAddImg] = useState("");
+  let [inpAddName, setInpAddName] = useState("");
+  let [inpAddPrice, setInpAddPrice] = useState("");
+  let [inpAddStatus, setInpAddStatus] = useState("");
+
+  function add() {
+    let newUser = {
+      img: inpAddImg,
+      name: inpAddName,
+      price: inpAddPrice,
+      status: inpAddStatus == "active" ? true : false,
+      id: Date.now(),
+    };
+    dispatch(addNewUser(newUser));
+    setIsModalOpenAdd(false);
+  }
+
+  // edit
+  const [isModalOpenEdit, setIsModalOpenEdit] = useState(false);
+
+  const handleCancelEdit = () => {
+    setIsModalOpenEdit(false);
+  };
+
+  let [inpEditImg, setInpEditImg] = useState("");
+  let [inpEditName, setInpEditName] = useState("");
+  let [inpEditPrice, setInpEditPrice] = useState("");
+  let [inpEditStatus, setInpEditStatus] = useState("");
+  let [idx, setIdx] = useState(null);
+
+  function openEditDialog(e) {
+    setIdx(e.id);
+    setInpEditImg(e.img);
+    setInpEditName(e.name);
+    setInpEditPrice(e.price);
+    setInpEditStatus(e.status ? "active" : "inactive");
+    setIsModalOpenEdit(true);
+  }
+
+  function edit() {
+    dispatch(
+      editUser({
+        idx: idx,
+        img: inpEditImg,
+        name: inpEditName,
+        price: inpEditPrice,
+        status: inpEditStatus == "active" ? true : false,
+      })
+    );
+    setIsModalOpenEdit(false);
+  }
   return (
     <div className={main}>
+      {/* // add  */}
+      <Modal
+        title="Basic Modal"
+        closable={{ "aria-label": "Custom Close Button" }}
+        open={isModalOpenAdd}
+        onOk={add}
+        onCancel={handleCancelAdd}
+      >
+        <article className="flex flex-col gap-3">
+          <Input
+            placeholder="Img..."
+            value={inpAddImg}
+            onChange={(e) => setInpAddImg(e.target.value)}
+          />
+          <Input
+            placeholder="Name..."
+            value={inpAddName}
+            onChange={(e) => setInpAddName(e.target.value)}
+          />
+          <Input
+            placeholder="Price..."
+            value={inpAddPrice}
+            onChange={(e) => setInpAddPrice(e.target.value)}
+          />
+          <select
+            className="border-1 border-gray-300 p-[6px] rounded-sm"
+            value={inpAddStatus}
+            onChange={(e) => setInpAddStatus(e.target.value)}
+          >
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </article>
+      </Modal>
+
+      {/* // edit  */}
+      <Modal
+        title="Basic Modal"
+        closable={{ "aria-label": "Custom Close Button" }}
+        open={isModalOpenEdit}
+        onOk={edit}
+        onCancel={handleCancelEdit}
+      >
+        <article className="flex flex-col gap-3">
+          <Input
+            placeholder="Img..."
+            value={inpEditImg}
+            onChange={(e) => setInpEditImg(e.target.value)}
+          />
+          <Input
+            placeholder="Name..."
+            value={inpEditName}
+            onChange={(e) => setInpEditName(e.target.value)}
+          />
+          <Input
+            placeholder="Price..."
+            value={inpEditPrice}
+            onChange={(e) => setInpEditPrice(e.target.value)}
+          />
+          <select
+            className="border-1 border-gray-300 p-[6px] rounded-sm"
+            value={inpEditStatus}
+            onChange={(e) => setInpEditStatus(e.target.value)}
+          >
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </article>
+      </Modal>
+
       <h2 className={h2}>Политика конфиденциальности</h2>
       <h3 className={h3}>1. ТЕРМИНЫ И ОПРЕДЕЛЕНИЯ</h3>
       <p className={gray}>
@@ -156,6 +291,62 @@ const Politika = () => {
         конфиденциальности. 9.3. Действующая Политика конфиденциальности
         размещена на сайте Общества.
       </p>
+      <Button
+        className="self-end my-5"
+        type="primary"
+        onClick={() => setIsModalOpenAdd(true)}
+      >
+        Open Modal
+      </Button>
+      <section className="grid md:grid-cols-4 gap-7">
+        {data.map((e) => (
+          <article
+            key={e.id}
+            className="flex flex-col gap-3 text-center items-center shadow-lg relative"
+          >
+            <img src={e.img} className="w-full h-[237px]" alt={e.name} />
+            <div className="flex flex-col gap-3 p-3">
+              <img
+                src="/imgMuslim/line.png"
+                className="mt-3 w-1/2 mx-auto"
+                alt=""
+              />
+              <h3 className={e.status ? "" : "text-red-500 line-through"}>
+                {e.name}
+              </h3>
+              <h2 className="text-2xl font-bold text-[#1D6BDD]">
+                {e.price} ₽/шт.
+              </h2>
+              <section className="grid grid-cols-4 gap-5 items-center justify-between mt-3">
+                <p className="border-1 border-[#C7C7C7] h-10 flex items-center justify-center">
+                  <i className="fa-solid fa-minus"></i>
+                </p>
+                <p className="text-xl border-1 border-[#C7C7C7] h-10 flex items-center justify-center">
+                  1
+                </p>
+                <p className="border-1 border-[#C7C7C7] h-10 flex items-center justify-center">
+                  <i className="fa-solid fa-plus"></i>
+                </p>
+                <i className="fa-brands fa-opencart border-1 border-[#C7C7C7] h-10 flex items-center justify-center bg-[#1D6BDD] text-white"></i>
+              </section>
+            </div>
+            <div className="absolute top-3 right-3 text-xl flex items-center gap-3">
+              <i
+                onClick={() => dispatch(deleteUser(e.id))}
+                className="fa-solid fa-trash-can text-red-500 cursor-pointer"
+              ></i>
+              <i
+                onClick={() => openEditDialog(e)}
+                className="fa-solid fa-pen text-blue-500 cursor-pointer"
+              ></i>
+              <Checkbox
+                checked={e.status}
+                onChange={() => dispatch(changeStatus(e.id))}
+              />
+            </div>
+          </article>
+        ))}
+      </section>
     </div>
   );
 };
